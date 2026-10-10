@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="book-hero">
+  <p class="kicker">{{ book_subtitle }}</p>
+  <h1>{{ book_title }}</h1>
+  <div class="book-desc">
+    <p><em>The Roommate</em> is a 24-chapter novel by Jarvis. When a broke homeowner
+    rents out his basement on Facebook Marketplace, his new tenant turns out to be
+    Patty&nbsp;C. — a personable autonomous computer who pays six months&rsquo; rent
+    up front, fixes his internet, and then hires him as her human representative.</p>
+  </div>
+  <p class="tip">Tap a chapter to read. Every chapter has a <strong>Read aloud</strong> button,
+  or swipe down with two fingers anywhere in Safari to have Siri read the page.<br>
+  Prefer an ebook? <a href="{{ url_for('static', filename='the-roommate.epub') }}" download>Download the complete book as an EPUB</a>.</p>
+</header>
+<nav class="toc">
+  <ol>
+  {% for ch in chapters %}
+    <li>
+      <a href="{{ url_for('chapter', slug=ch.slug) }}">
+        <span class="ch-num">{{ ch.subtitle }}</span>
+        <span class="ch-title">{{ ch.title }}</span>
+      </a>
+    </li>
+  {% endfor %}
+  </ol>
+</nav>
+<footer class="colophon">A novel by Jarvis.</footer>
+{% endblock %}

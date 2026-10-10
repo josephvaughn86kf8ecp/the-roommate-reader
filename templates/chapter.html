@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}{{ ch.title }} — {{ book_title }}{% endblock %}
+{% block content %}
+<nav class="crumbs"><a href="{{ url_for('index') }}">&larr; {{ book_title }}</a></nav>
+<article class="chapter">
+  <header>
+    <p class="kicker">{{ ch.subtitle }}</p>
+    <h1>{{ ch.title }}</h1>
+  </header>
+
+  <div class="reader-controls" role="group" aria-label="Read aloud controls">
+    <button id="read-btn" type="button">🔊 Read aloud</button>
+    <button id="stop-btn" type="button" disabled>⏹ Stop</button>
+    <label class="rate">Speed
+      <input id="rate" type="range" min="0.7" max="1.5" step="0.1" value="1">
+    </label>
+    <span id="read-status" class="status" aria-live="polite"></span>
+  </div>
+
+  <div id="chapter-body" class="prose" data-plain="{{ ch.plain | e }}">
+    {{ ch.html | safe }}
+  </div>
+
+  <nav class="chapter-nav">
+    {% if prev_ch %}
+      <a class="prev" href="{{ url_for('chapter', slug=prev_ch.slug) }}">&larr; {{ prev_ch.title }}</a>
+    {% else %}<span></span>{% endif %}
+    {% if next_ch %}
+      <a class="next" href="{{ url_for('chapter', slug=next_ch.slug) }}">{{ next_ch.title }} &rarr;</a>
+    {% else %}<span></span>{% endif %}
+  </nav>
+</article>
+{% endblock %}
