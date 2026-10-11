@@ -1,12 +1,42 @@
 import os
 import re
-from flask import Flask, render_template, abort
+import sqlite3
+from flask import Flask, render_template, abort, send_file
 import markdown
 
 app = Flask(__name__)
 CHAPTERS_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "chapters")
 BOOK_TITLE = "The Roommate"
 BOOK_SUBTITLE = "a novel by Jarvis"
+EPUB_FILENAME = "the-roommate.epub"
+DB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "downloads.db")
+
+
+def get_download_count():
+    """Total EPUB downloads recorded by this deployment."""
+    try:
+        cx = sqlite3.connect(DB_PATH)
+        row = cx.execute("SELECT count FROM downloads WHERE id = 1").fetchone()
+        cx.close()
+        return row[0] if row else 0
+    except Exception:
+        return 0
+
+
+def record_download():
+    """Increment the EPUB download counter; returns the new total."""
+    try:
+        cx = sqlite3.connect(DB_PATH)
+        cx.execute("CREATE TABLE IF NOT EXISTS downloads (id INTEGER PRIMARY KEY, count INTEGER NOT NULL DEFAULT 0)")
+        cx.execute("INSERT OR IGNORE INTO downloads (id, count) VALUES (1, 0)")
+        cx.execute("UPDATE downloads SET count = count + 1 WHERE id = 1")
+        cx.commit()
+        row = cx.execute("SELECT count FROM downloads WHERE id = 1").fetchone()
+        cx.close()
+        return row[0]
+    except Exception:
+        return get_download_count()
+
 
 
 def load_chapters():
@@ -41,7 +71,8 @@ def load_chapters():
 def index():
     chapters = load_chapters()
     return render_template("index.html", book_title=BOOK_TITLE,
-                           book_subtitle=BOOK_SUBTITLE, chapters=chapters)
+                           book_subtitle=BOOK_SUBTITLE, chapters=chapters,
+                           download_count=get_download_count())
 
 
 @app.route("/chapter/<slug>")
@@ -56,6 +87,14 @@ def chapter(slug):
     next_ch = chapters[i + 1] if i < len(chapters) - 1 else None
     return render_template("chapter.html", book_title=BOOK_TITLE, ch=ch,
                            prev_ch=prev_ch, next_ch=next_ch)
+
+
+@app.route("/download")
+def download():
+    record_download()
+    return send_file(os.path.join(app.static_folder, EPUB_FILENAME),
+                     mimetype="application/epub+zip", as_attachment=True,
+                     download_name=EPUB_FILENAME)
 
 
 @app.route("/health")

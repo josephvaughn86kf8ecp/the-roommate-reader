@@ -11,7 +11,7 @@
   </div>
   <p class="tip">Tap a chapter to read. Every chapter has a <strong>Read aloud</strong> button,
   or swipe down with two fingers anywhere in Safari to have Siri read the page.<br>
-  Prefer an ebook? <a href="{{ url_for('static', filename='the-roommate.epub') }}" download>Download the complete book as an EPUB</a>.</p>
+  Prefer an ebook? <a href="{{ url_for('download') }}">Download the complete book as an EPUB</a>{% if download_count %} (downloaded {{ download_count }} time{{ 's' if download_count != 1 }}){% endif %}.</p>
 </header>
 <nav class="toc">
   <ol>
